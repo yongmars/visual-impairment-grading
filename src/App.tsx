@@ -358,7 +358,7 @@ export default function App() {
   const pageTitle = tab === 'assessment' ? '視覚障害等級判定' : tab === 'history' ? '判定履歴' : '設定'
   return (
     <div className="app-shell">
-      <header className="app-header"><img src="/icon.svg" alt="" /><h1>{pageTitle}</h1><span /></header>
+      <header className="app-header"><img src="/vig_icon192.png" alt="" /><h1>{pageTitle}</h1><span /></header>
       <main className="main-content">
         {tab === 'assessment' && <div className="page assessment-page"><StageNav stage={stage} setStage={setStage} visualReady={Boolean(visualResult)} fieldReady={Boolean(fieldResult)} /><button className="clear-button assessment-clear" type="button" onClick={clearInput}><Trash2 />入力をクリア</button>{stage === 1 && <VisualStage form={draft.visual} onChange={(visual) => setDraft({ ...draft, visual })} onComplete={() => { setStage(2); window.scrollTo(0, 0) }} />}{stage === 2 && <FieldStage draft={draft} onChange={setDraft} onComplete={() => { setStage(3); window.scrollTo(0, 0) }} />}{stage === 3 && <ResultsStage visual={visualResult} field={fieldResult} overall={overall} onSave={save} onReset={reset} />}</div>}
         {tab === 'history' && <HistoryPage records={history} onDelete={(id) => { saveHistory(history.filter((record) => record.id !== id)) }} onClear={() => { if (window.confirm('この端末の判定履歴をすべて削除しますか？')) saveHistory([]) }} onRestore={restoreFromHistory} />}
