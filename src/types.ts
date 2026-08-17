@@ -10,6 +10,36 @@ export type VisualValue =
 
 export type Direction = 'up' | 'innerUp' | 'inner' | 'innerDown' | 'down' | 'outerDown' | 'outer' | 'outerUp'
 export type DirectionValues = Record<Direction, number>
+export type DirectionTextValues = Record<Direction, string>
+export type FieldMethod = 'goldmann' | 'automated'
+
+export interface DraftGoldmannEye {
+  peripheral: DirectionTextValues
+  central: DirectionTextValues
+  peripheralCenterAbsent: boolean
+  peripheralDisconnected: boolean
+  centralCenterAbsent: boolean
+}
+
+export interface DraftAssessment {
+  schemaVersion: 1
+  fieldMethod: FieldMethod
+  visual: {
+    right: VisualValue | ''
+    left: VisualValue | ''
+    correctedConfirmed: boolean
+  }
+  goldmann: {
+    right: DraftGoldmannEye
+    left: DraftGoldmannEye
+    halfFieldLoss: boolean | null
+  }
+  automated: {
+    esterman: string
+    rightCentral: string
+    leftCentral: string
+  }
+}
 
 export interface GradingResult {
   grade: Grade
