@@ -201,20 +201,13 @@ textarea { resize: vertical; }
 .diagram-legend span { display: flex; align-items: center; gap: 5px; }
 .diagram-legend i { width: 22px; height: 6px; display: inline-block; border-radius: 4px; }
 .counted-swatch { background: var(--blue); }
+.excluded-swatch { background: #dc2626; }
 .scotoma-swatch { background: #94a3b8; }
 .diagram-list { display: grid; gap: 12px; }
 .diagram-list article { padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 11px; }
 .diagram-list h3 { margin: 0 0 7px; }
 .diagram-list p { margin: 7px 0 0; color: #475569; font-size: 11px; }
-.field-diagram { width: min(100%,240px); display: block; margin: 0 auto; color: #94a3b8; }
-.plot-grid circle, .plot-grid path { fill: none; stroke: #d5dee9; stroke-width: 1; }
-.isopter { fill: rgba(219,234,254,.28); stroke: #334155; stroke-width: 3; }
-.counted-lines line { stroke: var(--blue); stroke-width: 3; stroke-linecap: round; }
-.scotoma { fill: #94a3b8; stroke: #475569; stroke-width: 2; }
-.deducted { fill: none; stroke: #b45309; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 3 4; }
-.fixation { fill: #172033; }
-.excluded-island { fill: rgba(254,226,226,.55); stroke: #b91c1c; stroke-width: 2; stroke-dasharray: 5 4; }
-.field-diagram text { fill: #b91c1c; font-size: 10px; font-weight: 800; }
+.field-diagram { width: min(100%,280px); height: auto; aspect-ratio: 1; display: block; margin: 0 auto; object-fit: contain; border-radius: 6px; }
 .help-rule { margin-top: 12px; padding: 11px; color: #1e40af; background: var(--blue-soft); border-radius: 9px; }
 .help-rule p { margin: 4px 0 0; }
 .help-note { color: var(--muted); }

@@ -143,7 +143,19 @@ describe('判定フロー', () => {
     expect(centralHelp).toHaveLength(2)
     fireEvent.click(peripheralHelp[0])
     expect(screen.getByRole('heading', { name: '視野角度の算出方法' })).toBeInTheDocument()
+    expect(screen.getByText('赤い線：計測に含めない線')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '5. 中心部と連続していない周辺視野' })).toBeInTheDocument()
+    const expectedImages = [
+      ['通常の視野で固視点からイソプタまでを算入する図', '/normal.png'],
+      ['中心暗点と重なる部分を差し引いて算出する図', '/central.png'],
+      ['傍中心暗点と経線が重なる部分だけを差し引く図', '/eccentric.png'],
+      ['固視点を含まない偏心視野でイソプタと重なる部分だけを算入する図', '/peripheral.png'],
+      ['中心部から離れた周辺視野を加算せず中心部だけで判定する図', '/separation.png'],
+    ]
+    expectedImages.forEach(([name, src]) => expect(screen.getByRole('img', { name })).toHaveAttribute('src', src))
+    fireEvent.click(screen.getByRole('button', { name: 'ヘルプを閉じる' }))
+    fireEvent.click(centralHelp[0])
+    expect(screen.getAllByRole('img')).toHaveLength(5)
   })
 
   it('総合等級ヘルプで現在の合計指数行を強調する', () => {

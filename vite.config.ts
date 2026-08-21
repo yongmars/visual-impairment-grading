@@ -7,7 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['vig_icon192.png', 'vig_icon512.png'],
+      includeAssets: [
+        'vig_icon192.png', 'vig_icon512.png',
+        'normal.png', 'central.png', 'eccentric.png', 'peripheral.png', 'separation.png',
+      ],
       manifest: {
         name: '視覚障害等級判定',
         short_name: '等級判定',
