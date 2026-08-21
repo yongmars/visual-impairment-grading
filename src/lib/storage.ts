@@ -24,7 +24,7 @@ export function createEmptyDraft(): DraftAssessment {
   return {
     schemaVersion: 1,
     fieldMethod: 'goldmann',
-    visual: { right: '', left: '', correctedConfirmed: false },
+    visual: { right: '', left: '', correctedConfirmed: false, diplopia: false, zeroEye: null },
     goldmann: { right: emptyGoldmannEye(), left: emptyGoldmannEye(), halfFieldLoss: null },
     automated: { esterman: '', rightCentral: '', leftCentral: '' },
   }
@@ -47,12 +47,12 @@ function isGoldmannEye(value: unknown): value is DraftGoldmannEye {
     && typeof value.centralCenterAbsent === 'boolean'
 }
 
-function isDraft(value: unknown): value is DraftAssessment {
-  if (!isObject(value) || value.schemaVersion !== 1) return false
+function parseDraft(value: unknown): DraftAssessment | null {
+  if (!isObject(value) || value.schemaVersion !== 1) return null
   const visual = value.visual
   const goldmann = value.goldmann
   const automated = value.automated
-  return (value.fieldMethod === 'goldmann' || value.fieldMethod === 'automated')
+  const valid = (value.fieldMethod === 'goldmann' || value.fieldMethod === 'automated')
     && isObject(visual)
     && (visual.right === '' || (typeof visual.right === 'string' && VISUAL_VALUES.has(visual.right as never)))
     && (visual.left === '' || (typeof visual.left === 'string' && VISUAL_VALUES.has(visual.left as never)))
@@ -65,6 +65,24 @@ function isDraft(value: unknown): value is DraftAssessment {
     && typeof automated.esterman === 'string'
     && typeof automated.rightCentral === 'string'
     && typeof automated.leftCentral === 'string'
+  if (!valid) return null
+
+  const visualObject = visual as Record<string, unknown>
+  const diplopia = typeof visualObject.diplopia === 'boolean' ? visualObject.diplopia : false
+  const zeroEye = diplopia && (visualObject.zeroEye === 'right' || visualObject.zeroEye === 'left') ? visualObject.zeroEye : null
+  return {
+    schemaVersion: 1,
+    fieldMethod: value.fieldMethod as DraftAssessment['fieldMethod'],
+    visual: {
+      right: visualObject.right as DraftAssessment['visual']['right'],
+      left: visualObject.left as DraftAssessment['visual']['left'],
+      correctedConfirmed: visualObject.correctedConfirmed as boolean,
+      diplopia,
+      zeroEye,
+    },
+    goldmann: goldmann as unknown as DraftAssessment['goldmann'],
+    automated: automated as unknown as DraftAssessment['automated'],
+  }
 }
 
 function isRecord(value: unknown): value is SavedAssessment {
@@ -96,7 +114,7 @@ export const draftStorage = {
   load(): DraftAssessment {
     try {
       const parsed: unknown = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? 'null')
-      return isDraft(parsed) ? parsed : createEmptyDraft()
+      return parseDraft(parsed) ?? createEmptyDraft()
     } catch {
       return createEmptyDraft()
     }

@@ -42,6 +42,23 @@ describe('視力等級', () => {
     expect(gradeVisual('0.15', 'hand')).toMatchObject({ right: '0.15', rightCalculated: 0.1, leftCalculated: 0, grade: 4 })
     expect(gradeVisual('counting', 'hand')).toMatchObject({ rightCalculated: 0.01, leftCalculated: 0, grade: 1 })
   })
+
+  it('指定した右眼だけを0として扱い実測値を保持する', () => {
+    expect(gradeVisual('0.8', '0.04', 'right')).toMatchObject({
+      right: '0.8', left: '0.04', rightCalculated: 0, leftCalculated: 0.04,
+      betterLabel: '左眼', grade: 2, index: 11, diplopiaApplied: true, zeroEye: 'right',
+    })
+  })
+
+  it('指定した左眼だけを0として扱い通常ロジックへ渡す', () => {
+    expect(gradeVisual('0.2', '0.8', 'left')).toMatchObject({
+      rightCalculated: 0.2, leftCalculated: 0, grade: 5, index: 2, zeroEye: 'left',
+    })
+  })
+
+  it('0扱い眼を指定しなければ従来結果と一致する', () => {
+    expect(gradeVisual('0.08', 'hand', null)).toEqual(gradeVisual('0.08', 'hand'))
+  })
 })
 
 describe('3:1計算', () => {

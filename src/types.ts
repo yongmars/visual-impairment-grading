@@ -12,6 +12,7 @@ export type Direction = 'up' | 'innerUp' | 'inner' | 'innerDown' | 'down' | 'out
 export type DirectionValues = Record<Direction, number>
 export type DirectionTextValues = Record<Direction, string>
 export type FieldMethod = 'goldmann' | 'automated'
+export type ZeroEye = 'right' | 'left'
 
 export interface DraftGoldmannEye {
   peripheral: DirectionTextValues
@@ -28,6 +29,8 @@ export interface DraftAssessment {
     right: VisualValue | ''
     left: VisualValue | ''
     correctedConfirmed: boolean
+    diplopia: boolean
+    zeroEye: ZeroEye | null
   }
   goldmann: {
     right: DraftGoldmannEye
@@ -55,6 +58,8 @@ export interface VisualResult extends GradingResult {
   leftCalculated: number
   betterLabel: string
   otherLabel: string
+  diplopiaApplied: boolean
+  zeroEye: ZeroEye | null
 }
 
 export interface GoldmannEyeInput {
@@ -112,7 +117,13 @@ export interface SavedAssessment {
   label: string
   memo: string
   rulesetId: typeof RULESET_ID
-  visualInput?: { right: VisualValue; left: VisualValue; correctedConfirmed: true }
+  visualInput?: {
+    right: VisualValue
+    left: VisualValue
+    correctedConfirmed: true
+    diplopia?: boolean
+    zeroEye?: ZeroEye | null
+  }
   visualResult?: VisualResult
   fieldInput?: GoldmannInput | AutomatedInput
   fieldResult?: FieldResult

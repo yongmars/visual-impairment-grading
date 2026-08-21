@@ -1,6 +1,6 @@
 import type {
   AutomatedInput, AutomatedResult, DirectionValues, FieldResult, Grade, GoldmannInput,
-  GoldmannResult, OverallResult, VisualResult, VisualValue,
+  GoldmannResult, OverallResult, VisualResult, VisualValue, ZeroEye,
 } from '../types'
 
 export const VISUAL_OPTIONS: Array<{ value: VisualValue; label: string }> = [
@@ -23,29 +23,23 @@ export function visualCalculated(value: VisualValue): number {
   return Number(value)
 }
 
-function handOrWorse(value: VisualValue): boolean {
-  return value === 'no-light' || value === 'light' || value === 'hand'
-}
-
 function result(grade: Grade, index: number, ruleId: string, reason: string) {
   return { grade, index, ruleId, reason }
 }
 
-export function gradeVisual(right: VisualValue, left: VisualValue): VisualResult {
-  const rightCalculated = visualCalculated(right)
-  const leftCalculated = visualCalculated(left)
+export function gradeVisual(right: VisualValue, left: VisualValue, zeroEye?: ZeroEye | null): VisualResult {
+  const rightCalculated = zeroEye === 'right' ? 0 : visualCalculated(right)
+  const leftCalculated = zeroEye === 'left' ? 0 : visualCalculated(left)
   const rightIsBetter = rightCalculated >= leftCalculated
-  const betterValue = rightIsBetter ? right : left
-  const otherValue = rightIsBetter ? left : right
   const better = Math.max(rightCalculated, leftCalculated)
   const other = Math.min(rightCalculated, leftCalculated)
   let graded = result('非該当' as const, 0, 'VA-NONE', '視力障害の等級条件に該当しません')
 
   if (better <= 0.01) graded = result(1, 18, 'VA-1', '良い方の眼の視力が0.01以下')
   else if (better >= 0.02 && better <= 0.03) graded = result(2, 11, 'VA-2-1', '良い方の眼の視力が0.02以上0.03以下')
-  else if (better === 0.04 && handOrWorse(otherValue)) graded = result(2, 11, 'VA-2-2', '良い方の眼が0.04、かつ他方の眼が手動弁以下')
+  else if (better === 0.04 && other === 0) graded = result(2, 11, 'VA-2-2', '良い方の眼が0.04、かつ他方の眼が手動弁以下')
   else if (better >= 0.04 && better <= 0.07) graded = result(3, 7, 'VA-3-1', '良い方の眼の視力が0.04以上0.07以下')
-  else if (better === 0.08 && handOrWorse(otherValue)) graded = result(3, 7, 'VA-3-2', '良い方の眼が0.08、かつ他方の眼が手動弁以下')
+  else if (better === 0.08 && other === 0) graded = result(3, 7, 'VA-3-2', '良い方の眼が0.08、かつ他方の眼が手動弁以下')
   else if (better >= 0.08 && better <= 0.1) graded = result(4, 4, 'VA-4', '良い方の眼の視力が0.08以上0.1以下')
   else if (better === 0.2 && other <= 0.02) graded = result(5, 2, 'VA-5', '良い方の眼が0.2、かつ他方の眼が0.02以下')
   else if (better >= 0.3 && better <= 0.6 && other <= 0.02) graded = result(6, 1, 'VA-6', '良い方の眼が0.3以上0.6以下、かつ他方の眼が0.02以下')
@@ -59,6 +53,8 @@ export function gradeVisual(right: VisualValue, left: VisualValue): VisualResult
     leftCalculated,
     betterLabel: same ? '両眼同等' : rightIsBetter ? '右眼' : '左眼',
     otherLabel: same ? '両眼同等' : rightIsBetter ? '左眼' : '右眼',
+    diplopiaApplied: Boolean(zeroEye),
+    zeroEye: zeroEye ?? null,
   }
 }
 
