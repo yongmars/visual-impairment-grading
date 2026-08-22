@@ -22,7 +22,9 @@ export default defineConfig({
         lang: 'ja',
         icons: [
           { src: '/vig_icon192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/vig_icon512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }
+          { src: '/vig_icon512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/vig_icon192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: '/vig_icon512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {
