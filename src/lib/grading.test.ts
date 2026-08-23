@@ -66,6 +66,8 @@ describe('3:1計算', () => {
     expect(weightedBinocular(20, 28)).toEqual({ value: 26, calculation: '(28×3＋20)÷4' })
     expect(weightedBinocular(18, 26)).toEqual({ value: 24, calculation: '(26×3＋18)÷4' })
     expect(weightedBinocular(1, 3).value).toBe(3)
+    expect(weightedBinocular(3, 1).value).toBe(3)
+    expect(weightedBinocular(0, 0)).toEqual({ value: 0, calculation: '(0×3＋0)÷4' })
   })
 })
 
