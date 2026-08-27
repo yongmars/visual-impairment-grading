@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 
@@ -169,6 +169,84 @@ describe('判定フロー', () => {
     const currentRow = screen.getByText('11～17').closest('tr')
     expect(currentRow).toHaveTextContent('11～17')
     expect(currentRow).toHaveTextContent('2級')
+  })
+
+  it('視力基準ヘルプに1～6級を表示し特殊条件を個別強調して入力を保持する', () => {
+    render(<App />)
+    fillVisual('0.08', 'hand')
+    fireEvent.click(screen.getByRole('button', { name: /3\s*結果/ }))
+    expect(screen.getByText('ルールID：VA-3-2')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '視力障害の等級判定基準を開く' }))
+    const dialog = screen.getByRole('dialog', { name: '視力障害の等級判定基準' })
+    ;['1級', '2級', '3級', '4級', '5級', '6級'].forEach((grade) => {
+      expect(within(dialog).getByRole('heading', { name: grade })).toBeInTheDocument()
+    })
+    ;['指数 18', '指数 11', '指数 7', '指数 4', '指数 2', '指数 1'].forEach((index) => {
+      expect(within(dialog).getByText(index)).toBeInTheDocument()
+    })
+    const currentCondition = within(dialog).getByText('良い方の眼の視力が0.08かつ、他方の眼が手動弁以下').closest('li')
+    expect(currentCondition).toHaveAttribute('aria-current', 'true')
+    const otherCondition = within(dialog).getByText('良い方の眼の視力が0.04以上0.07以下').closest('li')
+    expect(otherCondition).not.toHaveAttribute('aria-current')
+
+    fireEvent.click(within(dialog).getByRole('button', { name: '閉じる' }))
+    expect(screen.getByText('ルールID：VA-3-2')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /1\s*視力/ }))
+    expect(screen.getByLabelText('右眼 矯正視力')).toHaveValue('0.08')
+    expect(screen.getByLabelText('左眼 矯正視力')).toHaveValue('hand')
+  })
+
+  it('ゴールドマン基準を表示し5級の中心視野条件だけを強調する', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /2\s*視野/ }))
+    const inputs = screen.getAllByRole('spinbutton')
+    inputs.slice(0, 16).forEach((input) => fireEvent.change(input, { target: { value: '11' } }))
+    inputs.slice(16, 32).forEach((input) => fireEvent.change(input, { target: { value: '5' } }))
+    fireEvent.click(screen.getByLabelText('該当しない'))
+    fireEvent.click(screen.getByRole('button', { name: /視野を判定する/ }))
+    expect(screen.getByText('ルールID：VF-G-5-2')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '視野障害の等級判定基準を開く' }))
+    const dialog = screen.getByRole('dialog', { name: '視野障害の等級判定基準' })
+    expect(within(dialog).getByText('ゴールドマン型視野計')).toBeInTheDocument()
+    expect(within(dialog).getByText(/周辺視野はI\/4視標/)).toBeInTheDocument()
+    const gradeFive = within(dialog).getByRole('heading', { name: '5級' }).closest('article')
+    expect(gradeFive).toHaveAttribute('aria-current', 'true')
+    const gradeFiveScope = within(gradeFive as HTMLElement)
+    expect(gradeFiveScope.getByText('両眼中心視野角度が56°以下').closest('li')).toHaveAttribute('aria-current', 'true')
+    expect(gradeFiveScope.getByText('両眼による視野が2分の1以上欠損').closest('li')).not.toHaveAttribute('aria-current')
+  })
+
+  it('自動視野計基準を表示し5級のエスターマン条件だけを強調する', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /2\s*視野/ }))
+    fireEvent.click(screen.getByRole('button', { name: '自動視野計' }))
+    fireEvent.change(screen.getByLabelText('エスターマン視認点数'), { target: { value: '75' } })
+    fireEvent.change(screen.getByLabelText('10-2右眼視認点数'), { target: { value: '50' } })
+    fireEvent.change(screen.getByLabelText('10-2左眼視認点数'), { target: { value: '50' } })
+    fireEvent.click(screen.getByRole('button', { name: /視野を判定する/ }))
+    expect(screen.getByText('ルールID：VF-A-5-1')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '視野障害の等級判定基準を開く' }))
+    const dialog = screen.getByRole('dialog', { name: '視野障害の等級判定基準' })
+    expect(within(dialog).getByText('自動視野計')).toBeInTheDocument()
+    expect(within(dialog).getByText(/中心視野は10-2プログラム/)).toBeInTheDocument()
+    const gradeFive = within(dialog).getByRole('heading', { name: '5級' }).closest('article')
+    const gradeFiveScope = within(gradeFive as HTMLElement)
+    expect(gradeFiveScope.getByText('両眼開放エスターマンテスト視認点数が70点を超え100点以下').closest('li')).toHaveAttribute('aria-current', 'true')
+    expect(gradeFiveScope.getByText('両眼中心視野視認点数（10-2プログラム）が40点以下').closest('li')).not.toHaveAttribute('aria-current')
+    expect(within(dialog).queryByText(/I\/4による周辺視野角度総和/)).not.toBeInTheDocument()
+  })
+
+  it('非該当の視力基準ヘルプでは特定の等級を強調しない', () => {
+    render(<App />)
+    fillVisual('0.7', '0.7')
+    fireEvent.click(screen.getByRole('button', { name: /3\s*結果/ }))
+    fireEvent.click(screen.getByRole('button', { name: '視力障害の等級判定基準を開く' }))
+    const dialog = screen.getByRole('dialog', { name: '視力障害の等級判定基準' })
+    expect(dialog.querySelector('[aria-current="true"]')).toBeNull()
+    expect(within(dialog).queryByText('現在該当')).not.toBeInTheDocument()
   })
 
   it('新しいI/4・I/2順で8方向が揃った眼だけ総和を表示する', () => {
