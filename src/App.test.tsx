@@ -32,6 +32,29 @@ describe('判定フロー', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('矯正視力であることを確認')
   })
 
+  it('設定画面で更新履歴を新しい順に表示し、開くとNEWを既読保存する', () => {
+    const first = render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: '設定' }))
+    const updateButton = screen.getByRole('button', { name: /アップデート情報.*NEW.*Ver\. 1\.0\.3/ })
+    expect(updateButton).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '視能訓練士 ゆうまるす' })).toHaveAttribute('href', 'https://yongmars.com/')
+    expect(screen.getByRole('heading', { name: '【免責事項】' })).toBeInTheDocument()
+
+    fireEvent.click(updateButton)
+    const dialog = screen.getByRole('dialog', { name: 'アップデート情報' })
+    const versions = within(dialog).getAllByRole('heading', { name: /Ver\. 1\.0\.[0-3]/ }).map((heading) => heading.textContent)
+    expect(versions).toEqual(['Ver. 1.0.3', 'Ver. 1.0.2', 'Ver. 1.0.1', 'Ver. 1.0.0'])
+    expect(localStorage.getItem('visual-impairment-grading:last-seen-update-version')).toBe('1.0.3')
+    fireEvent.click(within(dialog).getByRole('button', { name: '閉じる' }))
+    expect(screen.queryByText('NEW')).not.toBeInTheDocument()
+
+    first.unmount()
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: '設定' }))
+    expect(screen.getByRole('button', { name: /アップデート情報.*Ver\. 1\.0\.3/ })).toBeInTheDocument()
+    expect(screen.queryByText('NEW')).not.toBeInTheDocument()
+  })
+
   it('複視該当時は0として扱う眼を必須にする', () => {
     render(<App />)
     fillVisual('0.8', '0.04')

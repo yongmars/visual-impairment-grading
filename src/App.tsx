@@ -7,6 +7,8 @@ import { PwaPrompt } from './components/PwaPrompt'
 import { DiplopiaHelp, HalfFieldHelp, OverallHelp } from './components/AssessmentHelp'
 import { FieldCriteriaHelp, VisualCriteriaHelp } from './components/GradingCriteriaHelp'
 import { VisualFieldAngleHelp } from './components/VisualFieldHelp'
+import { UpdateInfoDialog } from './components/UpdateInfoDialog'
+import { APP_VERSION } from './lib/appVersion'
 import {
   gradeAutomated, gradeGoldmann, gradeOverall, gradeVisual, sumDirections,
   visualLabel, VISUAL_OPTIONS, weightedBinocular,
@@ -389,7 +391,22 @@ function HistoryPage({ records, onDelete, onClear, onRestore }: { records: Saved
 }
 
 function SettingsPage() {
-  return <div className="page"><div className="page-title"><Settings /><div><h2>設定・基準情報</h2><p>アプリについて</p></div></div><article className="card settings-card"><h3>判定基準</h3><dl><div><dt>基準ID</dt><dd>{RULESET_ID}</dd></div><div><dt>最終確認日</dt><dd>{RULESET_CHECKED_AT}</dd></div></dl><p>身体障害者福祉法施行規則別表第5号および身体障害認定基準の2018年7月改正内容に基づきます。</p></article><article className="card settings-card"><h3>このアプリについて</h3><ul><li>入力値、計算途中、該当条件を確認するための業務用補助ツールです。</li><li>履歴はブラウザの端末内にのみ保存され、外部には送信されません。</li><li>視野図の画像解析や診断書作成には対応していません。</li></ul></article><div className="warning-card"><Info /><div><b>重要</b><p>最終的な診断・認定は、最新の身体障害認定基準および指定医・認定機関の判断を優先してください。</p></div></div><p className="version">視覚障害等級判定 Ver.1.0.0</p></div>
+  return (
+    <div className="page settings-page">
+      <div className="page-title"><Settings /><div><h2>設定・基準情報</h2><p>アプリについて</p></div></div>
+      <article className="card settings-card"><h3>判定基準</h3><dl><div><dt>基準ID</dt><dd>{RULESET_ID}</dd></div><div><dt>最終確認日</dt><dd>{RULESET_CHECKED_AT}</dd></div></dl><p>身体障害者福祉法施行規則別表第5号および身体障害認定基準の2018年7月改正内容に基づきます。</p></article>
+      <article className="card settings-card"><h3>このアプリについて</h3><ul><li>入力値、計算途中、該当条件を確認するための業務用補助ツールです。</li><li>履歴はブラウザの端末内にのみ保存され、外部には送信されません。</li><li>視野図の画像解析や診断書作成には対応していません。</li></ul></article>
+      <section className="settings-lower" aria-label="アプリ情報">
+        <UpdateInfoDialog />
+        <div className="creator-row"><span>作った人：</span><a href="https://yongmars.com/" target="_blank" rel="noopener noreferrer">視能訓練士 ゆうまるす</a></div>
+        <section className="disclaimer-section">
+          <h3>【免責事項】</h3>
+          <ul><li>最終的な診断・認定は、最新の身体障害認定基準および指定医・認定機関の判断を優先してください。</li></ul>
+        </section>
+      </section>
+      <p className="version">視覚障害等級判定 Ver. {APP_VERSION}</p>
+    </div>
+  )
 }
 
 export default function App() {
